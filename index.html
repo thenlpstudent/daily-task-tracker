@@ -1,0 +1,133 @@
+<html>
+
+<head>
+        <style>
+                .container {
+                        width: 100%;
+                        height: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                }
+
+                .make-hide {
+                        visibility: hidden;
+                        display: none;
+                }
+
+                .daily_goal {
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: center;
+                        gap: 100px;
+                        margin-bottom: 10px;
+                }
+        </style>
+</head>
+
+<body>
+        <div id="register" class="container make-hide">
+                <h3>Enter your daily-goals</h3>
+                <div id="goal_container">
+
+                </div>
+                <button onclick="add_new_goal(event)">Add New!</button>
+                <button onclick="make_profile(event)">Make New Profile!</button>
+        </div>
+        <div id="user" class="container make-hide">
+                <div id="daily_goals_container">
+
+                </div>
+        </div>
+</body>
+<script>
+        function add_new_goal(event) {
+                goal_container.appendChild(make_init_goal_elem())
+        }
+        function make_profile(event) {
+                let profile = [];
+                for (let i = 0; i < goal_container.children.length; i++) {
+                        const row = goal_container.children[i];
+                        profile.push(
+                                {
+                                        goal_title: row.children[0].value
+                                }
+                        );
+                }
+                sessionStorage.setItem("profile", JSON.stringify(profile));
+        }
+        function is_new_user() {
+                return sessionStorage.getItem("profile") == null;
+        }
+        function is_existing_user() {
+                return sessionStorage.getItem("profile") != null;
+        }
+        function init_page() {
+                const elem_to_show = is_new_user() ? "register" : "user";
+                document.getElementById(elem_to_show).classList.remove("make-hide");
+                if (is_existing_user()) {
+                        init_daily_goals()
+                }
+        }
+
+        function init_daily_goals() {
+                const profile_data = sessionStorage.getItem("profile");
+                console.log(profile_data)
+                if (profile_data == null)
+                        return;
+                const pd = JSON.parse(profile_data);
+                for (let i = 0; i < pd.length; i++) {
+                        const el = pd[i];
+                        daily_goals_container.appendChild(make_goal_elem(el));
+                }
+        }
+        function init_user_profile() {
+                goal_container.appendChild(make_init_goal_elem());
+        }
+
+        function make_init_goal_elem() {
+                let el = document.createElement("div");
+                el.classList.add("init_goal");
+                el.appendChild(document.createElement("input"));
+                return el;
+        }
+
+
+
+        function make_goal_elem(data) {
+                let el = document.createElement("div");
+                el.classList.add("daily_goal");
+                let goal_lbl = document.createElement("label");
+                goal_lbl.classList.add("daily_goal_lbl");
+                goal_lbl.innerText = data.goal_title;
+
+                let goal_timer = document.createElement("label");
+                goal_timer.classList.add("daily_goal_timer_lbl");
+
+
+                let goal_btn = document.createElement("button");
+                goal_btn.addEventListener("click", on_timer_toggle);
+                goal_btn.innerText = "Start Task!";
+                goal_btn.dataset["toggle"] = "0";
+
+                el.appendChild(goal_lbl);
+                el.appendChild(goal_timer);
+                el.appendChild(goal_btn);
+                return el;
+        }
+        function on_timer_toggle(event) {
+                const elem = event.target.parentElement.querySelector(".daily_goal_timer_lbl")
+                        .innerText =
+                        (event.target.dataset["toggle"] == "0" ? "started!" : "done!");
+                event.target.dataset["toggle"] = event.target.dataset["toggle"] == "0" ? "1" : "0";
+                event.target.innerText = event.target.dataset["toggle"] == "1" ? "Stop Task!" : "Start Task!"
+
+
+        }
+        window.onload = function (event) {
+                init_page();
+        }
+</script>
+
+</html>
